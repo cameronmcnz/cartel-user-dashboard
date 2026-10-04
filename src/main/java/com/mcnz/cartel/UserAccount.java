@@ -3,12 +3,9 @@ package com.mcnz.cartel;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-
 public class UserAccount {
 
-    
     private String username;
-
     private String passwordHash;
     private String roles;
     private String refreshTokenHash;
