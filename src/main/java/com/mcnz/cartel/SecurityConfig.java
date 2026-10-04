@@ -21,8 +21,8 @@ import org.springframework.security.oauth2.jwt.JwtValidators;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.web.SecurityFilterChain;
 
-@Configuration
-@EnableMethodSecurity
+
+
 public class SecurityConfig {
 
     private static final String JWT_SECRET =
@@ -31,7 +31,7 @@ public class SecurityConfig {
     private static final String JWT_ISSUER = "http://localhost:3000";
     private static final String JWT_AUDIENCE = "cartel-control";
 
-    @Bean
+    
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
         configureCsrf(http);
@@ -63,7 +63,7 @@ public class SecurityConfig {
         http.oauth2ResourceServer(oauth -> oauth.jwt(Customizer.withDefaults()));
     }
 
-    @Bean
+    
     JwtDecoder jwtDecoder() {
 
         SecretKey secretKey = new SecretKeySpec(JWT_SECRET.getBytes(StandardCharsets.UTF_8), "HmacSHA256");

@@ -1,0 +1,12 @@
+@PreAuthorize("hasAuthority('SCOPE_admin') or authentication.name == 'marcus'")
+@Document("users")
+@Id
+@Autowired
+@Configuration
+@Bean
+@SpringBootApplication
+@RestController
+@EnableMethodSecurity
+@Bean
+@RequestMapping("/api/cartel")
+@GetMapping("/users")
