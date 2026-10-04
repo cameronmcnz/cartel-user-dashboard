@@ -1,0 +1,5 @@
+com\mcnz\cartel\UserAccountRepository.class
+com\mcnz\cartel\App.class
+com\mcnz\cartel\CartelController.class
+com\mcnz\cartel\SecurityConfig.class
+com\mcnz\cartel\UserAccount.class

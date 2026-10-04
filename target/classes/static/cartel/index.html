@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cartel User Database</title>
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            padding: 28px;
+            font-family: Arial, sans-serif;
+            background: #101820;
+            color: #f5f7fa;
+        }
+        .page { max-width: 1400px; margin: 0 auto; }
+        .header { display: flex; justify-content: space-between; gap: 16px; align-items: center; }
+        button {
+            padding: 9px 14px;
+            border: 0;
+            border-radius: 7px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .card {
+            margin-top: 22px;
+            padding: 18px;
+            border-radius: 12px;
+            background: #182532;
+            border: 1px solid #31465a;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 12px;
+        }
+        th, td {
+            padding: 10px;
+            border-bottom: 1px solid #31465a;
+            text-align: left;
+            vertical-align: top;
+        }
+        th { color: #9ecbff; }
+        code {
+            display: block;
+            max-width: 470px;
+            overflow-wrap: anywhere;
+            white-space: normal;
+            color: #dbeafe;
+        }
+        .help { color: #aab8c5; line-height: 1.5; }
+    </style>
+</head>
+<body>
+
+<div class="page">
+
+    <div class="header">
+        <div>
+            <h1>Cartel User Database</h1>
+            <div class="help">The HTML page is public. The user data comes from a JWT-protected REST endpoint.</div>
+        </div>
+        <button id="logout">Logout</button>
+    </div>
+
+    <div class="card">
+        <h2>MongoDB Users</h2>
+        <p class="help">
+            Data is loaded from <code>/api/cartel/users</code>. The browser sends the JWT in the Authorization header.
+        </p>
+
+        <div id="status">Loading users...</div>
+
+        <table id="usersTable" hidden>
+            <thead>
+            <tr>
+                <th>Username</th>
+                <th>Roles / Scope</th>
+                <th>Password Hash</th>
+                <th>Refresh Token Hash</th>
+            </tr>
+            </thead>
+            <tbody id="usersBody"></tbody>
+        </table>
+    </div>
+
+</div>
+
+<script>
+    const TOKEN_KEY = "cartelAccessToken";
+
+    function returnToLogin(error) {
+        sessionStorage.removeItem(TOKEN_KEY);
+        window.location.replace("/index.html?error=" + encodeURIComponent(error));
+    }
+
+    function textCell(value) {
+        const td = document.createElement("td");
+        const code = document.createElement("code");
+        code.textContent = value == null ? "(null)" : String(value);
+        td.appendChild(code);
+        return td;
+    }
+
+    async function loadUsers() {
+        const token = sessionStorage.getItem(TOKEN_KEY);
+
+        if (!token) {
+            returnToLogin("missing-token");
+            return;
+        }
+
+        try {
+            const response = await fetch("/api/cartel/users", {
+                headers: { Authorization: "Bearer " + token }
+            });
+
+            if (response.status === 401) {
+                returnToLogin("unauthorized");
+                return;
+            }
+
+            if (response.status === 403) {
+                returnToLogin("forbidden");
+                return;
+            }
+
+            if (!response.ok) {
+                returnToLogin("api-error");
+                return;
+            }
+
+            const users = await response.json();
+            const body = document.getElementById("usersBody");
+
+            body.innerHTML = "";
+
+            for (const user of users) {
+                const row = document.createElement("tr");
+                row.appendChild(textCell(user.username));
+                row.appendChild(textCell(user.roles));
+                row.appendChild(textCell(user.passwordHash));
+                row.appendChild(textCell(user.refreshTokenHash));
+                body.appendChild(row);
+            }
+
+            document.getElementById("status").textContent = users.length + " user(s) loaded from MongoDB.";
+            document.getElementById("usersTable").hidden = false;
+
+        } catch {
+            returnToLogin("network-error");
+        }
+    }
+
+    document.getElementById("logout").addEventListener("click", () => {
+        sessionStorage.removeItem(TOKEN_KEY);
+        window.location.replace("/index.html");
+    });
+
+    loadUsers();
+</script>
+
+</body>
+</html>
